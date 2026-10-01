@@ -134,7 +134,7 @@
   <!-- Name screen -->
   <div id="name-screen">
     <h1>Voice Room</h1>
-    <p class="sub">Enter a name to join the only room</p>
+    <p class="sub">Enter a name to join the global room</p>
     <input id="name-input" type="text" placeholder="Your name" maxlength="20" autocomplete="off" />
     <button id="join-btn">Join Voice</button>
   </div>
@@ -160,7 +160,7 @@
 
 <script>
   // ====== CONFIG ======
-  const ROOM_ID = "simple-voice-room-v1";          // fixed room – everyone joins this
+  const ROOM_ID = "simple-voice-room-v1";          
   const PEER_CONFIG = {
     host: "0.peerjs.com",
     port: 443,
@@ -170,7 +170,17 @@
       iceServers: [
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
-        { urls: "stun:stun2.l.google.com:19302" }
+        // Public Free TURN servers to route traffic across different networks/firewalls
+        {
+          urls: "turn:openrelay.metered.ca:80",
+          username: "openrelayproject",
+          credential: "openrelayproject"
+        },
+        {
+          urls: "turn:openrelay.metered.ca:443",
+          username: "openrelayproject",
+          credential: "openrelayproject"
+        }
       ]
     }
   };
@@ -181,8 +191,9 @@
   let localStream = null;
   let isSelfMuted = false;
   let isHost = false;
-  let hostConn = null;                 // data connection to host (if client)
-  let connections = {};                // peerId -> { dataConn, mediaCall, audioEl, name, localMuted }
+  let hostConn = null;                 
+  let connections = {};                
+  let hostClientConns = {};            // track all client data connections if we are host
   let myPeerId = null;
 
   // ====== DOM ======
@@ -248,7 +259,6 @@
 
     statusEl.textContent = "Connecting to room…";
 
-    // Create our peer with random ID
     peer = new Peer(PEER_CONFIG);
 
     peer.on("open", id => {
@@ -259,11 +269,6 @@
 
     peer.on("error", err => {
       console.error(err);
-      if (err.type === "unavailable-id") {
-        // will be handled in host logic
-      } else {
-        statusEl.textContent = "Connection error – try refresh";
-      }
     });
 
     peer.on("call", handleIncomingCall);
@@ -272,9 +277,7 @@
 
   // ====== HOST / JOIN LOGIC ======
   function tryJoinOrBecomeHost() {
-    // Try to connect to the fixed room ID (the host)
     const conn = peer.connect(ROOM_ID, { reliable: true });
-
     let joined = false;
 
     conn.on("open", () => {
@@ -283,11 +286,7 @@
       hostConn = conn;
       statusEl.textContent = "Joined room";
       statusEl.classList.add("connected");
-
-      // Tell host who we are
       conn.send({ type: "join", id: myPeerId, name: myName });
-
-      // Host will send us the list of people
     });
 
     conn.on("data", data => handleHostMessage(data));
@@ -297,12 +296,11 @@
       becomeHost();
     });
 
-    // If we cannot connect quickly → we become the host
     setTimeout(() => {
       if (!joined) {
         becomeHost();
       }
-    }, 2500);
+    }, 3000);
   }
 
   function becomeHost() {
@@ -310,8 +308,6 @@
     statusEl.textContent = "You are the host of the room";
     statusEl.classList.add("connected");
 
-    // We need a second Peer instance that claims the fixed ROOM_ID
-    // (PeerJS does not allow changing ID of existing peer)
     const hostPeer = new Peer(ROOM_ID, PEER_CONFIG);
 
     hostPeer.on("open", () => {
@@ -320,48 +316,56 @@
 
     hostPeer.on("connection", conn => {
       conn.on("open", () => {
-        // New person joined
+        hostClientConns[conn.peer] = conn;
+
         conn.on("data", data => {
           if (data.type === "join") {
-            // Add them
             addRemote(data.id, data.name, null);
-            // Send them the full list
+            
             const list = Object.keys(connections).map(id => ({
               id,
               name: connections[id].name
             }));
-            // also include ourselves
             list.push({ id: myPeerId, name: myName });
             conn.send({ type: "list", list });
 
-            // Tell everyone else about the new person
-            broadcast({ type: "new", id: data.id, name: data.name }, data.id);
+            broadcastToOthers({ type: "new", id: data.id, name: data.name }, data.id);
+          } else if (data.type === "name") {
+            if (connections[data.id]) {
+              connections[data.id].name = data.name;
+              renderParticipants();
+            }
+            broadcastToOthers(data, data.id);
           }
         });
       });
 
       conn.on("close", () => {
-        // find who left and notify
+        delete hostClientConns[conn.peer];
       });
     });
 
     hostPeer.on("error", err => {
       if (err.type === "unavailable-id") {
-        // somehow room taken, try again later
         setTimeout(becomeHost, 2000);
       }
     });
+  }
 
-    // We also keep our original peer for media
+  function broadcastToOthers(msg, excludeId) {
+    Object.keys(hostClientConns).forEach(peerId => {
+      if (peerId !== excludeId) {
+        const c = hostClientConns[peerId];
+        if (c && c.open) c.send(msg);
+      }
+    });
   }
 
   function handleHostMessage(data) {
     if (data.type === "list") {
-      // Full list of people already in the room
       data.list.forEach(p => {
         if (p.id !== myPeerId) {
           addRemote(p.id, p.name, null);
-          // Call them for audio
           callPeer(p.id);
         }
       });
@@ -385,7 +389,6 @@
   // ====== MEDIA ======
   function callPeer(remoteId) {
     if (connections[remoteId] && connections[remoteId].mediaCall) return;
-
     const call = peer.call(remoteId, localStream);
     setupCall(call, remoteId);
   }
@@ -403,7 +406,6 @@
         connections[remoteId].stream = remoteStream;
       }
 
-      // Create audio element
       let audio = connections[remoteId].audioEl;
       if (!audio) {
         audio = document.createElement("audio");
@@ -431,7 +433,7 @@
   }
 
   function handleIncomingData(conn) {
-    // Only used when we are host (already handled)
+    // Handled in hostPeer setup if we are host
   }
 
   // ====== PARTICIPANTS ======
@@ -465,7 +467,6 @@
   function renderParticipants() {
     participantsEl.innerHTML = "";
 
-    // Myself first
     const meDiv = document.createElement("div");
     meDiv.className = "person me";
     meDiv.innerHTML = `
@@ -482,7 +483,6 @@
     `;
     participantsEl.appendChild(meDiv);
 
-    // Others
     Object.keys(connections).forEach(id => {
       const p = connections[id];
       const div = document.createElement("div");
@@ -492,7 +492,7 @@
           <div class="avatar">${(p.name || "?").charAt(0).toUpperCase()}</div>
           <span class="name-text">${escapeHtml(p.name || "User")}</span>
         </div>
-        <button class="mute-btn \( {p.localMuted ? "muted" : ""}" onclick="toggleLocalMute(' \){id}')">
+        <button class="mute-btn ${p.localMuted ? "muted" : ""}" onclick="toggleLocalMute('${id}')">
           ${p.localMuted ? "🔇" : "🔊"}
         </button>
       `;
@@ -523,16 +523,6 @@
   };
 
   // ====== HELPERS ======
-  function broadcast(msg, excludeId) {
-    // Only host can broadcast easily – clients send to host
-    if (isHost) {
-      // we would need to keep data connections to everyone
-      // for simplicity in this single-file version we only update names via host
-    } else if (hostConn && hostConn.open) {
-      hostConn.send(msg);
-    }
-  }
-
   function broadcastName() {
     if (hostConn && hostConn.open) {
       hostConn.send({ type: "name", id: myPeerId, name: myName });
@@ -553,11 +543,6 @@
     Object.keys(connections).forEach(removeRemote);
     location.reload();
   }
-
-  // First render if already has name
-  if (myName) {
-    // auto start optional – user still needs to click Join
-  }
 </script>
 </body>
-    </html>
+</html>
