@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamer TopUp BD</title>
+    <style>
+       body { background: #121212; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; }
+       .header { background: #1f1f1f; padding: 15px 20px; display: flex; justify-content: space-between; border-bottom: 2px solid #ff4757; }
+       .logo { font-size: 24px; font-weight: bold; color: #ff4757; }
+       .container { max-width: 800px; margin: 20px auto; padding: 20px; }
+       .card { background: #1e1e24; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+       .card h3 { margin-top: 0; color: #ff4757; border-bottom: 1px solid #333; padding-bottom: 10px; }
+       .input-group { margin-bottom: 15px; }
+       .input-group label { display: block; margin-bottom: 5px; color: #aaa; }
+       .input-group input { width: 100%; padding: 10px; background: #2b2b36; border: 1px solid #444; color: #fff; border-radius: 5px; box-sizing: border-box; outline: none;}
+       .input-group input:focus { border-color: #ff4757; }
+       .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+       .package { background: #2b2b36; border: 1px solid #444; padding: 15px; text-align: center; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+       .package.active { border-color: #ff4757; background: #ff475722; }
+       .package .dia { font-size: 18px; font-weight: bold; color: #00d2d3; }
+       .package .price { color: #ff9f43; margin-top: 5px; font-weight: bold;}
+       .btn { width: 100%; padding: 15px; background: #ff4757; color: #fff; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+       .btn:hover { background: #ff6b81; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">FastTopUp</div>
+        <div style="font-weight: bold; color: #00d2d3;">Wallet: ৳0.00</div>
+    </div>
+    
+    <div class="container">
+        <!-- Step 1: UID Input -->
+        <div class="card">
+            <h3>1. Player Info</h3>
+            <div class="input-group">
+                <label>Player UID</label>
+                <input type="number" id="uid" placeholder="Enter Free Fire UID" required>
+            </div>
+        </div>
+
+        <!-- Step 2: Package Selection -->
+        <div class="card">
+            <h3>2. Select Package</h3>
+            <div class="grid" id="packageGrid">
+                <div class="package active" onclick="selectPack(this, '115 Diamonds', 75)">
+                    <div class="dia">115 💎</div><div class="price">৳75</div>
+                </div>
+                <div class="package" onclick="selectPack(this, '240 Diamonds', 150)">
+                    <div class="dia">240 💎</div><div class="price">৳150</div>
+                </div>
+                <div class="package" onclick="selectPack(this, 'Weekly Pass', 170)">
+                    <div class="dia">Weekly Pass</div><div class="price">৳170</div>
+                </div>
+                <div class="package" onclick="selectPack(this, 'Monthly Pass', 850)">
+                    <div class="dia">Monthly Pass</div><div class="price">৳850</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Payment Details -->
+        <div class="card">
+            <h3>3. Payment (bKash)</h3>
+            <p style="color:#aaa; font-size:14px; margin-bottom: 15px;">Send money to <b>01XXXXXXXXX</b> and enter TrxID below.</p>
+            <div class="input-group">
+                <label>Transaction ID (TrxID)</label>
+                <input type="text" id="trxid" placeholder="e.g. 9F8A7B6C5D" required>
+            </div>
+            <button class="btn" onclick="placeOrder()">Pay & Order</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedPackage = '115 Diamonds';
+        let selectedPrice = 75;
+
+        // Handles clicking on different packages
+        function selectPack(element, name, price) {
+            document.querySelectorAll('.package').forEach(p => p.classList.remove('active'));
+            element.classList.add('active');
+            selectedPackage = name;
+            selectedPrice = price;
+        }
+
+        // Submits the order to local storage
+        function placeOrder() {
+            const uid = document.getElementById('uid').value;
+            const trxid = document.getElementById('trxid').value;
+
+            if(!uid || !trxid) {
+                alert('Please enter your Game UID and the bKash TrxID.');
+                return;
+            }
+
+            const newOrder = {
+                id: 'ORD' + Math.floor(1000 + Math.random() * 9000),
+                date: new Date().toLocaleString(),
+                uid: uid,
+                package: selectedPackage,
+                price: selectedPrice,
+                trxid: trxid,
+                status: 'Pending'
+            };
+
+            // Retrieve existing orders, add new one, and save back to local storage
+            let orders = JSON.parse(localStorage.getItem('adminOrders')) || [];
+            orders.push(newOrder);
+            localStorage.setItem('adminOrders', JSON.stringify(orders));
+
+            alert('Order Placed Successfully! It is pending verification.');
+            window.location.reload();
+        }
+    </script>
+</body>
+</html>
