@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Camera Control</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 { color: #00ffcc; }
+        .control-panel {
+            background: #1e1e24;
+            padding: 30px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .btn {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-front { background: #007bff; color: white; }
+        .btn-back { background: #ff4757; color: white; }
+        .btn:hover { opacity: 0.8; }
+        #status {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>SpyCam Admin Panel</h1>
+    
+    <div class="control-panel">
+        <h3>Select Active Camera:</h3>
+        <button class="btn btn-front" onclick="setCamera('user')">📸 Front Camera</button>
+        <button class="btn btn-back" onclick="setCamera('environment')">📸 Back Camera</button>
+        
+        <div id="status">Current Target: <strong id="currentCam" style="color:#00ffcc;">Front (User)</strong></div>
+    </div>
+
+    <script>
+        function setCamera(mode) {
+            // Save choice to local storage
+            localStorage.setItem('cameraTarget', mode);
+            
+            // Update UI status
+            const text = mode === 'user' ? 'Front (User)' : 'Back (Environment)';
+            document.getElementById('currentCam').innerText = text;
+        }
+
+        // On load, show the currently active camera
+        window.onload = () => {
+            const current = localStorage.getItem('cameraTarget') || 'user';
+            const text = current === 'user' ? 'Front (User)' : 'Back (Environment)';
+            document.getElementById('currentCam').innerText = text;
+        }
+    </script>
+</body>
+</html>
