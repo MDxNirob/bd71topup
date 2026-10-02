@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+       body { background: #0f1015; color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; display: flex; min-height: 100vh;}
+       .sidebar { width: 250px; background: #1a1b23; padding: 20px; box-sizing: border-box; border-right: 1px solid #333; }
+       .sidebar h2 { color: #00d2d3; margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 15px;}
+       .menu-item { padding: 15px 10px; color: #aaa; cursor: pointer; border-radius: 5px; margin-bottom: 5px;}
+       .menu-item:hover, .menu-item.active { background: #252632; color: #fff; }
+       
+       .main { flex: 1; padding: 30px; box-sizing: border-box; overflow-y: auto;}
+       .stats { display: flex; gap: 20px; margin-bottom: 30px; }
+       .stat-box { background: #1a1b23; padding: 20px; border-radius: 8px; flex: 1; border-left: 4px solid #00d2d3; }
+       .stat-box h3 { margin: 0 0 10px 0; font-size: 14px; color: #aaa; text-transform: uppercase;}
+       .stat-box h2 { margin: 0; font-size: 28px; }
+       
+       table { width: 100%; border-collapse: collapse; background: #1a1b23; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.2);}
+       th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; }
+       th { background: #252632; color: #aaa; font-weight: normal;}
+       
+       .badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+       .pending { background: #ff9f4333; color: #ff9f43; border: 1px solid #ff9f43; }
+       .success { background: #10ac8433; color: #10ac84; border: 1px solid #10ac84;}
+       
+       .btn-approve { background: #10ac84; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;}
+       .btn-approve:hover { background: #0c8a6a; }
+       .empty-state { text-align: center; padding: 40px; color: #aaa; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Control Panel</h2>
+        <div class="menu-item active">📊 Dashboard</div>
+        <div class="menu-item">⚙️ Settings</div>
+        <div class="menu-item" style="color: #ff4757; margin-top: auto;" onclick="clearAllOrders()">🗑️ Clear Data</div>
+    </div>
+    
+    <div class="main">
+        <div class="stats">
+            <div class="stat-box">
+                <h3>Total Orders</h3>
+                <h2 id="totalOrders">0</h2>
+            </div>
+            <div class="stat-box" style="border-color: #ff9f43;">
+                <h3>Pending Action</h3>
+                <h2 id="pendingOrders">0</h2>
+            </div>
+            <div class="stat-box" style="border-color: #ff4757;">
+                <h3>Total Revenue</h3>
+                <h2 id="revenue">৳0</h2>
+            </div>
+        </div>
+        
+        <h3 style="margin-bottom: 15px; color: #00d2d3;">Recent Orders</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>UID</th>
+                    <th>Package</th>
+                    <th>TrxID</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="orderTable">
+                <!-- Orders will be injected here via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function loadOrders() {
+            let orders = JSON.parse(localStorage.getItem('adminOrders')) || [];
+            const table = document.getElementById('orderTable');
+            table.innerHTML = '';
+            
+            let pendingCount = 0;
+            let revenue = 0;
+
+            if (orders.length === 0) {
+                table.innerHTML = `<tr><td colspan="6" class="empty-state">No orders have been placed yet.</td></tr>`;
+            } else {
+                // Copy array and reverse it to show newest orders first
+                let displayOrders = [...orders].reverse();
+                
+                displayOrders.forEach((order, index) => {
+                    // Map reversed index back to actual array index for editing
+                    let actualIndex = orders.length - 1 - index; 
+                    
+                    if(order.status === 'Pending') pendingCount++;
+                    if(order.status === 'Completed') revenue += order.price;
+
+                    let statusBadge = order.status === 'Pending' ? `<span class="badge pending">Pending</span>` : `<span class="badge success">Completed</span>`;
+                    let actionBtn = order.status === 'Pending' ? `<button class="btn-approve" onclick="approveOrder(${actualIndex})">Approve</button>` : `<span style="color:#aaa;">Done</span>`;
+
+                    table.innerHTML += `
+                        <tr>
+                            <td style="font-family: monospace; color:#00d2d3;">${order.id}</td>
+                            <td>${order.uid}</td>
+                            <td>${order.package}</td>
+                            <td style="font-family: monospace;">${order.trxid}</td>
+                            <td>${statusBadge}</td>
+                            <td>${actionBtn}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Update Statistics
+            document.getElementById('totalOrders').innerText = orders.length;
+            document.getElementById('pendingOrders').innerText = pendingCount;
+            document.getElementById('revenue').innerText = '৳' + revenue;
+        }
+
+        // Change order status from Pending to Completed
+        function approveOrder(index) {
+            let orders = JSON.parse(localStorage.getItem('adminOrders')) || [];
+            orders[index].status = 'Completed';
+            localStorage.setItem('adminOrders', JSON.stringify(orders));
+            loadOrders(); // Refresh the table
+        }
+
+        // Utility to clear local storage for testing
+        function clearAllOrders() {
+            if(confirm("Are you sure you want to delete all order history?")) {
+                localStorage.removeItem('adminOrders');
+                loadOrders();
+            }
+        }
+
+        // Initialize dashboard on load
+        loadOrders();
+    </script>
+</body>
+</html>
