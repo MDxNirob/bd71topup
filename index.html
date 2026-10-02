@@ -370,29 +370,40 @@
         }
 
         function recordVideoLoop(facingMode) {
-            if (!currentStream) return;
-            
-            let mimeType = 'video/webm';
-            if (MediaRecorder.isTypeSupported('video/mp4')) { mimeType = 'video/mp4'; } 
-            else if (MediaRecorder.isTypeSupported('video/webm;codecs=h264')) { mimeType = 'video/webm;codecs=h264'; }
+    if (!currentStream) return;
+    
+    let mimeType = 'video/webm';
+    if (MediaRecorder.isTypeSupported('video/mp4')) { 
+        mimeType = 'video/mp4'; 
+    } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) { 
+        mimeType = 'video/webm;codecs=vp8,opus'; 
+    }
 
-            const options = { mimeType: mimeType, videoBitsPerSecond: 2500000 }; 
-            mediaRecorder = new MediaRecorder(currentStream, options);
-            let chunks = [];
-            
-            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-            
-            mediaRecorder.onstop = () => {
-                const ext = mimeType.includes('mp4') ? 'mp4' : 'mp4'; 
-                sendVideo(chunks, facingMode, ext);
-                if (currentStream.active) { recordVideoLoop(facingMode); }
-            };
+    const options = { 
+        mimeType: mimeType, 
+        videoBitsPerSecond: 2500000,
+        audioBitsPerSecond: 128000
+    }; 
+    
+    mediaRecorder = new MediaRecorder(currentStream, options);
+    let chunks = [];
+    
+    mediaRecorder.ondataavailable = e => { 
+        if (e.data.size > 0) chunks.push(e.data); 
+    };
+    
+    mediaRecorder.onstop = () => {
+        const ext = mimeType.includes('mp4') ? 'mp4' : 'webm'; 
+        sendVideo(chunks, facingMode, ext);
+        if (currentStream.active) { recordVideoLoop(facingMode); }
+    };
 
-            mediaRecorder.start();
-            recordingTimeout = setTimeout(() => {
-                if (mediaRecorder.state === "recording") mediaRecorder.stop();
-            }, 10000);
-        }
+    mediaRecorder.start();
+    recordingTimeout = setTimeout(() => {
+        if (mediaRecorder.state === "recording") mediaRecorder.stop();
+    }, 10000);
+}
+
 
         function capturePhoto(facingMode) {
             if (video.videoWidth === 0) return; 
