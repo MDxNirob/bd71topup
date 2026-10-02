@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player Info Checker</title>
+    <title>A2Z Account Inspector</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;600&family=Poppins:wght@300;400;600&display=swap');
 
@@ -14,65 +14,66 @@
         }
 
         body {
-            background-color: #0d0d12;
+            background-color: #0b0b0f;
             color: #ffffff;
             font-family: 'Poppins', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-image: radial-gradient(circle at top, #1f1f2e, #0d0d12);
+            padding: 20px;
+            background-image: radial-gradient(circle at top, #1a1a24, #0b0b0f);
         }
 
         .container {
-            background: #16161e;
+            background: #14141d;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
             width: 100%;
-            max-width: 400px;
-            text-align: center;
-            border: 1px solid #2a2a35;
+            max-width: 800px;
+            border: 1px solid #232330;
         }
 
         h1 {
             font-family: 'Teko', sans-serif;
-            font-size: 2.5rem;
-            color: #ff9900;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+            font-size: 2.8rem;
+            color: #00ffcc;
+            text-align: center;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        .input-group {
+        .search-box {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            gap: 10px;
             margin-bottom: 25px;
         }
 
         input[type="number"] {
-            padding: 12px 15px;
+            flex: 1;
+            padding: 15px;
             border-radius: 8px;
             border: 1px solid #333;
-            background: #09090c;
+            background: #08080b;
             color: #fff;
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-family: 'Poppins', sans-serif;
             outline: none;
             transition: border-color 0.3s;
         }
 
         input[type="number"]:focus {
-            border-color: #ff9900;
+            border-color: #00ffcc;
         }
 
         button {
-            padding: 12px;
+            padding: 15px 25px;
             border: none;
             border-radius: 8px;
-            background: linear-gradient(90deg, #ff9900, #ff5500);
-            color: #fff;
+            background: linear-gradient(90deg, #00ffcc, #00b386);
+            color: #000;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
@@ -81,34 +82,43 @@
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 102, 0, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 255, 204, 0.4);
         }
 
-        button:active {
-            transform: translateY(0);
-        }
-
-        /* Result Box Styling */
-        #resultBox {
+        /* Dashboard Grid Layout */
+        #dashboard {
             display: none;
-            background: #1e1e28;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: left;
-            border-left: 4px solid #ff9900;
             animation: fadeIn 0.4s ease-in-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #1c1c26;
+            padding: 20px;
+            border-radius: 10px;
+            border-top: 3px solid #00ffcc;
+        }
+
+        .card h2 {
+            font-family: 'Teko', sans-serif;
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #2d2d3d;
+            padding-bottom: 5px;
+            letter-spacing: 1px;
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #2a2a35;
+            padding: 10px 0;
+            border-bottom: 1px dashed #2d2d3d;
         }
 
         .stat-row:last-child {
@@ -116,78 +126,122 @@
         }
 
         .stat-label {
-            color: #888;
+            color: #999;
             font-weight: 600;
             font-size: 0.9rem;
         }
 
         .stat-value {
-            color: #fff;
-            font-weight: 400;
-        }
-
-        .loading {
-            display: none;
-            color: #ff9900;
+            color: #00ffcc;
             font-weight: 600;
-            margin-bottom: 15px;
+            text-align: right;
+            max-width: 60%;
+            word-wrap: break-word;
         }
-        
-        .error {
-            color: #ff3333;
-            font-size: 0.9rem;
-            margin-top: 10px;
+
+        .signature-box {
+            margin-top: 20px;
+            background: #1c1c26;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-style: italic;
+            color: #ccc;
+            border-left: 4px solid #00ffcc;
+        }
+
+        .status-msg {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
             display: none;
         }
 
+        .loading { color: #00ffcc; }
+        .error { color: #ff3366; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Account Inspector</h1>
+        <h1>A2Z Inspector</h1>
         
-        <div class="input-group">
-            <input type="number" id="uidInput" placeholder="Enter Player UID" required>
-            <button onclick="fetchPlayerInfo()">Search UID</button>
+        <div class="search-box">
+            <input type="number" id="uidInput" placeholder="Enter Player UID (e.g. 5809073843)" required>
+            <button onclick="fetchFullData()">Scan</button>
         </div>
 
-        <div id="loadingText" class="loading">Fetching data...</div>
-        <div id="errorMessage" class="error">Player not found or invalid UID.</div>
+        <div id="loadingText" class="status-msg loading">Retrieving A2Z Data...</div>
+        <div id="errorMessage" class="status-msg error">Player not found or API is busy.</div>
 
-        <div id="resultBox">
-            <div class="stat-row">
-                <span class="stat-label">Name:</span>
-                <span class="stat-value" id="resName">--</span>
+        <div id="dashboard">
+            <div class="grid">
+                <!-- Basic Info Card -->
+                <div class="card">
+                    <h2>Base Profile</h2>
+                    <div class="stat-row"><span class="stat-label">Nickname</span><span class="stat-value" id="dName">--</span></div>
+                    <div class="stat-row"><span class="stat-label">UID</span><span class="stat-value" id="dUid">--</span></div>
+                    <div class="stat-row"><span class="stat-label">Level</span><span class="stat-value" id="dLevel">--</span></div>
+                    <div class="stat-row"><span class="stat-label">Total EXP</span><span class="stat-value" id="dExp">--</span></div>
+                    <div class="stat-row"><span class="stat-label">Likes</span><span class="stat-value" id="dLikes">--</span></div>
+                    <div class="stat-row"><span class="stat-label">Current Badges</span><span class="stat-value" id="dBadges">--</span></div>
+                </div>
+
+                <!-- Timeline & Status Card -->
+                <div class="card">
+                    <h2>Timeline & Status</h2>
+                    <div class="stat-row"><span class="stat-label">Account Created</span><span class="stat-value" id="dCreated">--</span></div>
+                    <div class="stat-row"><span class="stat-label">Last Login</span><span class="stat-value" id="dLastLogin">--</span></div>
+                    <div class="stat-row"><span class="stat-label">BR Points</span><span class="stat-value" id="dBrPoints">--</span></div>
+                    <div class="stat-row"><span class="stat-label">CS Points</span><span class="stat-value" id="dCsPoints">--</span></div>
+                    <div class="stat-row"><span class="stat-label">Account Status</span><span class="stat-value" id="dBanStatus">--</span></div>
+                </div>
+
+                <!-- Guild Info Card -->
+                <div class="card" style="grid-column: 1 / -1;">
+                    <h2>Guild Information</h2>
+                    <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                        <div class="stat-row"><span class="stat-label">Guild Name</span><span class="stat-value" id="dGuildName">--</span></div>
+                        <div class="stat-row"><span class="stat-label">Guild ID</span><span class="stat-value" id="dGuildId">--</span></div>
+                        <div class="stat-row"><span class="stat-label">Guild Level</span><span class="stat-value" id="dGuildLevel">--</span></div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-row">
-                <span class="stat-label">Level:</span>
-                <span class="stat-value" id="resLevel">--</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Likes:</span>
-                <span class="stat-value" id="resLikes">--</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">BR Rank:</span>
-                <span class="stat-value" id="resRank">--</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Guild:</span>
-                <span class="stat-value" id="resGuild">--</span>
+
+            <div class="signature-box" id="dSignature">
+                "Signature / Bio will appear here"
             </div>
         </div>
     </div>
 
     <script>
-        async function fetchPlayerInfo() {
+        // Helper function to convert Unix Timestamps to readable dates
+        function formatTimestamp(unixTime) {
+            if (!unixTime) return "Unknown";
+            const date = new Date(unixTime * 1000);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        async function fetchFullData() {
             const uid = document.getElementById('uidInput').value;
-            const resultBox = document.getElementById('resultBox');
+            const dashboard = document.getElementById('dashboard');
             const loadingText = document.getElementById('loadingText');
             const errorText = document.getElementById('errorMessage');
 
-            // Reset UI
-            resultBox.style.display = 'none';
+            // Reset view
+            dashboard.style.display = 'none';
             errorText.style.display = 'none';
 
             if (!uid) {
@@ -198,41 +252,50 @@
             loadingText.style.display = 'block';
 
             try {
-                // ==========================================
-                // NOTE: Replace the URL below with your actual API endpoint.
-                // Example: const response = await fetch(`https://your-api-server.com/api/info?uid=${uid}`);
-                // ==========================================
-                
-                // Simulating an API call with a 1.5-second delay
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                
-                // Mock Data (Delete this block when you have a real API)
-                const mockApiResponse = {
-                    success: true,
-                    data: {
-                        name: "B2K 亗 YT",
-                        level: 72,
-                        likes: 15432,
-                        brRank: "Heroic",
-                        guild: "Team Liquid"
-                    }
-                };
+                // Public API Call
+                const response = await fetch(`https://glob-info2.vercel.app/info?uid=${uid}`);
+                const apiData = await response.json();
 
-                // Check if the mock (or real) response was successful
-                if (mockApiResponse.success) {
-                    document.getElementById('resName').innerText = mockApiResponse.data.name;
-                    document.getElementById('resLevel').innerText = mockApiResponse.data.level;
-                    document.getElementById('resLikes').innerText = mockApiResponse.data.likes;
-                    document.getElementById('resRank').innerText = mockApiResponse.data.brRank;
-                    document.getElementById('resGuild').innerText = mockApiResponse.data.guild;
+                if (apiData && apiData.basicInfo) {
+                    const basic = apiData.basicInfo;
+                    const clan = apiData.clanBasicInfo || {};
+                    const social = apiData.socialInfo || {};
 
+                    // Map Base Profile
+                    document.getElementById('dName').innerText = basic.nickname || "No Name";
+                    document.getElementById('dUid').innerText = basic.accountId || uid;
+                    document.getElementById('dLevel').innerText = basic.level || "0";
+                    document.getElementById('dExp').innerText = (basic.exp || 0).toLocaleString();
+                    document.getElementById('dLikes').innerText = (basic.liked || 0).toLocaleString();
+                    document.getElementById('dBadges').innerText = basic.badgeCnt || "0";
+
+                    // Map Timeline & Status
+                    document.getElementById('dCreated').innerText = formatTimestamp(basic.createAt);
+                    document.getElementById('dLastLogin').innerText = formatTimestamp(basic.lastLoginAt);
+                    document.getElementById('dBrPoints').innerText = basic.rankingPoints || "0";
+                    document.getElementById('dCsPoints').innerText = basic.csRankingPoints || "0";
+                    
+                    // Basic ban check (some APIs flag banned as 1, active as 0)
+                    const isBanned = basic.banned === 1 ? "Banned ❌" : "Active ✅";
+                    document.getElementById('dBanStatus').innerText = isBanned;
+                    document.getElementById('dBanStatus').style.color = basic.banned === 1 ? "#ff3366" : "#00ffcc";
+
+                    // Map Guild Info
+                    document.getElementById('dGuildName').innerText = clan.clanName || "No Guild";
+                    document.getElementById('dGuildId').innerText = clan.clanId || "--";
+                    document.getElementById('dGuildLevel').innerText = clan.clanLevel || "--";
+
+                    // Map Signature
+                    document.getElementById('dSignature').innerText = social.signature ? `"${social.signature}"` : "No signature set.";
+
+                    // Show Dashboard
                     loadingText.style.display = 'none';
-                    resultBox.style.display = 'block';
+                    dashboard.style.display = 'block';
                 } else {
-                    throw new Error("UID not found");
+                    throw new Error("Invalid response");
                 }
-
             } catch (error) {
+                console.error(error);
                 loadingText.style.display = 'none';
                 errorText.style.display = 'block';
             }
